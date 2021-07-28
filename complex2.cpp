@@ -1207,7 +1207,7 @@ EX namespace dice {
         auto dat = data[i];
         int wa = dw->hardness[dat.dd.val];
         int wb = dw->max_hardness;
-        unsigned int red = ((wa * 0x80) + ((wb-wa) * 0xff)) / wb;
+        unsigned int red = ((wa * 0x00) + ((wb-wa) * 0xff)) / wb;
         color_t col = 0xFF0000FF + (red << 16);
         queuestr(fpp ? dat.V * zpush(cgi.FLOOR) : dat.V, .5, its(dat.dd.val+1), col);
         if(i <= 22)
