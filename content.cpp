@@ -1744,15 +1744,15 @@ ITEM( 'o', 0x40C000, "Orb of Growth", itOrbGrowth, IC_ORB, ZERO | IF_RANGED, RES
  )
 
 MONSTER( 'W', 0xAAAAAA, "Tine (Guarding)", moTineGuard, CF_FACE_SIDE | CF_SPAM, RESERVED, moYeti,
-    "These dog-like creatures usually stay still except to defend against encroaching Ivies and Birds of Blight.\n\n"
+    "These dog-like creatures usually stay still except to defend against encroaching Ivies and Blight Birds.\n\n"
     "If you pick up certain items within distance 2 of a Guarding Tine, it will become angry and start to chase you. The guarded items are:\n  * Ivy Tesseract\n  * Orb of Slashing\n  * Orb of the Triangle\n  * Orb of Ferocity"
     )
 MONSTER( 'W', 0xDDDDDD, "Tine", moTine, CF_FACE_SIDE, RESERVED, moYeti,
     "This tine has become angry!"
     )
 
-MONSTER( 'B', 0xDD00DD, "Bird of Blight", moBirdBlight, CF_FACE_SIDE | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE | CF_NONLIVING, RESERVED, moEagle,
-    "When a Bird of Blight dies, adjacent plants and treasures are destroyed, and adjacent Orbs are corrupted. The effect can spread up to three cells from the source."
+MONSTER( 'B', 0xDD00DD, "Blight Bird", moBirdBlight, CF_FACE_SIDE | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE | CF_NONLIVING, RESERVED, moEagle,
+    "When a Blight Bird dies, adjacent plants and treasures are destroyed, and adjacent Orbs are corrupted. The effect can spread up to three cells from the source."
     )
 
 //shmupspecials
