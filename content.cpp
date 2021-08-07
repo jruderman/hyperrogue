@@ -950,8 +950,8 @@ WALL( '+', 0x0000A0, "boat", waBoat, ZERO | WF_BOAT | WF_NOFLIGHT, RESERVED, 0, 
 WALL( '.', 0x00FF00, "island", waCIsland, ZERO | WF_CISLAND, RESERVED, 0, sgNone, cislandhelp)
 WALL( '.', 0x80C060, "island", waCIsland2, ZERO | WF_CISLAND, RESERVED, 0, sgNone, cislandhelp)
 WALL( '#', 0x006000, "tree", waCTree, WF_WALL | WF_HIGHWALL | WF_CONE | WF_CISLAND, RESERVED, 0, sgTree, 
-    "The forests of Caribbean are too dense to be traversed by humans, "
-    "and they are hard to burn. Many colorful parrots can be found there."
+    "These forests are too dense to be traversed by humans, "
+    "and they are hard to burn."
     )
 WALL( ',', 0x800000, "rock I", waRed1, ZERO | WF_RED, RESERVED, 1, sgNone, redrockhelp)
 WALL( ':', 0xC00000, "rock II", waRed2, ZERO | WF_RED, RESERVED, 2, sgNone, redrockhelp)
