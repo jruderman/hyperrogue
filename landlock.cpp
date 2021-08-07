@@ -457,7 +457,7 @@ EX eLand getNewLand(eLand old) {
     laStorms, laWhirlwind, laOvergrown, laBlizzard, laDryForest, laWineyard, laVolcano,
     laDeadCaves, laRedRock, laVariant, laHell, laCocytus, laPower,
     laBull, laTerracotta, laRose, laGraveyard, laHive, laDragon, laTrollheim,
-    laWet, laFrog, laEclectic, laCursed, laDice,
+    laWet, laFrog, laEclectic, laCursed, laDice, laTines,
     laCrossroads5,
     })
     if(landUnlocked(l)) tab[cnt++] = l;    
@@ -471,6 +471,7 @@ EX eLand getNewLand(eLand old) {
   
   for(clos c: { 
     clos{laZebra, laMotion, 2, 2}, {laZebra, laHunting, 2, 2},
+    {laTines, laHunting, 3, 3}, {laTines, laJungle, 3, 3}, {laTines, laTerracotta, 3, 3},
     {laDragon, laReptile, 5, 5},
     {laVariant, laRuins, 5, 5}, {laVariant, laEmerald, 5, 5}, {laVariant, laGraveyard, 5, 5},
     {laPalace, laDungeon, 5, 0},
@@ -569,7 +570,7 @@ EX vector<eLand> land_over = {
   laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
   laRedRock, laVolcano,
   laDragon, laTortoise, laDice,
-  laOvergrown, laClearing, laStorms, laBurial, laWhirlwind, 
+  laTines, laOvergrown, laClearing, laStorms, laBurial, laWhirlwind,
   laBlizzard,
   laFrog, laEclectic, laCursed,
   laRuins, laEmerald, laVariant, laCamelot, 
@@ -759,7 +760,7 @@ EX land_validity_t& land_validity(eLand l) {
   #endif
 
   #if !CAP_COMPLEX2
-  if(among(l, laBrownian, laWestWall, laVariant))
+  if(among(l, laBrownian, laWestWall, laVariant, laTines))
     return disabled;
   #endif
 

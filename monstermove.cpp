@@ -438,6 +438,7 @@ EX int moveval(cell *c1, cell *c2, int d, flagtype mf) {
       }
     if(isPlayerOn(c2)) return peace::on ? -1700 : 2500;
     else if(isFriendlyOrBug(c2)) return peace::on ? -1600 : 2000;
+    else if((m == moTineGuard || m == moTine) && among(c2->monst, moIvyRoot, moIvyHead, moIvyBranch, moIvyWait, moBirdBlight)) return 1700;
     else return 500;
     }
   
@@ -559,6 +560,7 @@ EX int stayval(cell *c, flagtype mf) {
   if(c->monst == moRagingBull) return -1690; // worse than to stay in place
   if(c->monst == moBat && batsAfraid(c)) return 575;
   if(c->monst == moHunterGuard) return 1600; // prefers to stay in place
+  if(c->monst == moTineGuard) return 1600; // prefers to stay in place
   // Lava Wolves will wander if not hunting
   if(c->monst == moLavaWolf) return 750;
   return 1000;

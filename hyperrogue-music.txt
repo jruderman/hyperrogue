@@ -164,6 +164,8 @@
 [91] */music/hr3-graveyard.ogg
 # Dice Reserve
 [92] */music/hr3-laboratory.ogg
+# Tines Forest
+[93] */music/hr3-jungle.ogg
 
 # None [00] (used when the window is out of focus)
 

@@ -2102,6 +2102,39 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       break;
     
+    case laTines:
+      #if CAP_COMPLEX2
+      if(fargen) {
+        if((S7 == 7) ? (zebra3(c) == 3) : (hrand(8) == 0)) {
+          c->wall = waCTree;
+          }
+        if(hrand(300 * c->type) < 50 + items[itTines] && !c->monst && !c->wall && !safety) {
+          bool placeGuard = true;
+          forCellEx(c2, c) if (isIvy(c2->monst) || c2->monst == moTineGuard) placeGuard = false;
+          if (placeGuard) c->monst = moTineGuard;
+          }
+        }
+      if(d == 8) {
+        if(hrand_monster(100) == 0 && !c->monst && !c->wall && !safety && !isPlayerOn(c)) {
+          bool placeIvy = true;
+          forCellEx(c2, c) if (c2->monst || c2->wall || c2->item || isPlayerOn(c2)) placeIvy = false;
+          if (placeIvy) buildIvy(c, 0, 3);
+          }
+        }
+      if(d == 7 && !c->monst && !c->wall && !safety) {
+        if(tines::well_guarded(c)) {
+          int guards = tines::count_guards(c);
+          if (guards >= 3) c->item = pick(itOrbSide1, itOrbSide2, itOrbSide3);
+          else if (guards == 2) c->item = itTines;
+          }
+        if(!c->item) {
+          if (hrand_monster(6000) < 6 + items[itTines] + yendor::hardness())
+            c->monst = moBirdBlight;
+          }
+        }
+      #endif
+      break;
+
     case laOcean:
       if(d >= 8) c->wall = waSea;
       if(d == 7 && !safety) {

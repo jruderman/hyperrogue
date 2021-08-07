@@ -1443,5 +1443,54 @@ EX namespace dice {
   int hook = addHook(hooks_clearmemory, 0, [] () { data.clear(); });
 EX }
 
+EX namespace tines {
+
+  // When called on a cell with no adjacent guards, returns the number of guards at distance 2
+  EX int count_guards(cell *c) {
+    int guards = 0;
+    manual_celllister cl;
+    forCellEx(c2, c)
+      forCellEx(c3, c2)
+        if (!cl.listed(c3) && c3->monst == moTineGuard)
+          guards += 1, cl.add(c3);
+    return guards;
+    }
+
+  // Returns true if there is no cell a player can plan to move to after collecting a guarded item on c.
+  // Usually, this means the tines could pinch the player at c (if there are at least two).
+  // However, monsters might make a wrong choice or even be forced to choose one cell to leave unguarded.
+  EX bool well_guarded(cell *c) {
+    forCellEx(c2, c) {
+      if (c2->monst) return false;
+      if (c2->wall == waCTree || c2->wall == waBarrier) continue;
+
+      bool guarded = false;  // after the player moves to c, can they still safely move to c2?
+      forCellEx(c3, c2) {
+        if (c3->monst == moTineGuard)
+          guarded = true;  // dog on c3 can move to c2, thereby guarding c2 directly
+        else if (isNeighbor(c3, c))
+          forCellEx(c4, c3)
+            if (c4->monst == moTineGuard)
+              guarded = true;  // dog on c4 can move to c3, thereby guarding c2 indirectly
+        }
+      if (!guarded) { return false; }
+      }
+    return true;
+    }
+
+  EX bool guard_item(cell *c) {
+    return c->land == laTines && among(c->item, itTines, itOrbSide1, itOrbSide2, itOrbSide3);
+    }
+
+  EX void wake_near(cell *c) {
+    LATE ( wake_near(c); )
+    forCellEx(c2, c)
+      forCellEx(c3, c2)
+        if(c3->monst == moTineGuard)
+          c3->monst = moTine;
+    }
+
+EX }
+
 }
 #endif

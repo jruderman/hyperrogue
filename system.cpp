@@ -422,7 +422,7 @@ EX namespace scores {
 /** \brief the amount of boxes reserved for each hr::score item */
 #define MAXBOX 500
 /** \brief currently used boxes in hr::score */
-#define POSSCORE 406
+#define POSSCORE 412
 /** \brief a struct to keep local score from an earlier game */
 struct score {
   /** \brief version used */
@@ -913,6 +913,13 @@ EX void applyBoxes() {
   applyBoxI(itCurseRepulsion, true);
   applyBoxI(itCurseGluttony, true);
   applyBoxI(itCurseWater, true);
+  list_invorb();
+
+  applyBoxI(itTines);
+  applyBoxOrb(itOrbGrowth);
+  applyBoxM(moTineGuard);
+  applyBoxM(moTine);
+  applyBoxM(moBirdBlight);
   list_invorb();
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);

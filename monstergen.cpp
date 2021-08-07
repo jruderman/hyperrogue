@@ -438,7 +438,7 @@ EX void wandering() {
       continue;
       }
 
-    else if(c->wall == waCTree && !c->monst && wchance(items[itPirate], 15) && canReachPlayer(c, moSlime)) {
+    else if(c->land == laCaribbean && c->wall == waCTree && !c->monst && wchance(items[itPirate], 15) && canReachPlayer(c, moSlime)) {
       c->monst = moParrot;
       playSeenSound(c);
       continue;
@@ -588,6 +588,9 @@ EX void wandering() {
 
     else if(c->land == laHunting && wchance(items[itHunting], 50, 26))
       c->monst = moHunterDog;
+
+    else if(c->land == laTines && wchance(items[itTines], 10))
+      c->monst = moBirdBlight;
 
     else if(c->land == laDesert && wchance(items[itSpice], 10))
       c->monst = (hrand(10) || peace::on) ? moDesertman : moWorm;

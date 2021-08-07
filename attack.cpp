@@ -58,6 +58,7 @@ int* killtable[] = {
     &kills[moFallingDog], &kills[moVariantWarrior], &kills[moWestHawk],
     &kills[moPike], &kills[moRusalka], &kills[moFrog], &kills[moPhaser], &kills[moVaulter],
     &kills[moHexer], &kills[moAnimatedDie], &kills[moAngryDie],
+    &kills[moTine], &kills[moTineGuard], &kills[moBirdBlight],
     NULL
     };
 
@@ -409,6 +410,42 @@ EX void minerEffect(cell *c) {
   if(c->wall != ow && ow) drawParticles(c, winf[ow].color, 16);
   } 
 
+EX void blightEffect(cell *c, int spread_distance) {
+  changes.ccell(c);
+  bool spread = false;
+
+  if (destroyHalfvine(c)) {
+    spread = true;
+    }
+  else if(among(c->wall, waVinePlant, waCTree, waBigTree, waSmallTree, waShrub, waRose, waBigBush, waSmallBush, waSolidBranch, waWeakBranch)) {
+    drawParticles(c, winf[c->wall].color, 16);
+    c->wall = waNone;
+    spread = true;
+    }
+  if(itemclass(c->item) == IC_TREASURE) {
+    drawParticles(c, iinf[c->item].color, 16);
+    c->item = itNone;
+    spread = true;
+    }
+  else if(itemclass(c->item) == IC_ORB && !(classflag(c->item) & IF_CURSE) && c->item != itGreenStone) {
+    drawParticles(c, iinf[c->item].color, 16);
+    eItem curse = curse_opposite_orb(c->item);
+    if(curse) {
+      addMessage(XLAT("%The1 is corrupted into a %2!", c->item, curse));
+      c->item = curse;
+      }
+    else {
+      addMessage(XLAT("%The1 is drained of its power!", c->item));
+      c->item = itGreenStone;
+      }
+    spread = true;
+    }
+
+  if(spread_distance && spread) {
+    forCellEx(c2, c) blightEffect(c2, spread_distance - 1);
+    }
+  }
+
 EX void killMutantIvy(cell *c, eMonster who) {
   if(checkOrb(who, itOrbStone)) petrify(c, waPetrified, moMutant);
   changes.ccell(c);
@@ -599,6 +636,13 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       if(c2->wall == waDeadwall) c2->wall = waDeadfloor2;
       if(c2->wall == waExplosiveBarrel) explodeBarrel(c2);
       }
+    }
+  if(m == moBirdBlight) {
+    pcount = 0;
+    playSound(c, "splash" + pick12());
+    blightEffect(c, 0);
+    forCellEx(c1, c)
+      blightEffect(c1, 2);
     }
   if(m == moOrangeDog) {
     if(pcount) for(int i=0; i<8; i++) {

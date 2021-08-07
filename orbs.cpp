@@ -122,6 +122,16 @@ EX void reverse_curse(eItem curse, eItem orb, bool cancel) {
     }
   }
 
+EX eItem curse_opposite_orb(eItem it) {
+  if(it == itOrbSlaying) return itCurseWeakness;
+  else if(it == itOrbSpeed) return itCurseFatigue;
+  else if(it == itOrbMagnetism) return itCurseRepulsion;
+  else if(it == itOrbFire) return itCurseWater;
+  else if(it == itOrbTime) return itCurseDraining;
+  else if(it == itOrbChoice) return itCurseGluttony;
+  return itNone;
+  }
+
 EX void reduceOrbPowers() {
 
   reverse_curse(itCurseWeakness, itOrbSlaying, true);
@@ -158,6 +168,7 @@ EX void reduceOrbPowers() {
   reduceOrbPower(itOrbThorns, 150);
   reduceOrbPower(itOrbWater, 150);
   reduceOrbPower(itOrbAir, 150);
+  reduceOrbPower(itOrbGrowth, 150);
   reduceOrbPower(itOrbFrog, 77);
   reduceOrbPower(itOrbDash, 77);
   reduceOrbPower(itOrbPhasing, 77);
@@ -776,6 +787,12 @@ void telekinesis(cell *dest) {
     addMessage(XLAT("Your power is drained by %the1!", dest->wall));
     }    
 
+  #if CAP_COMPLEX2
+  if(tines::guard_item(dest)) {
+    tines::wake_near(dest);
+    }
+  #endif
+
   moveItem(dest, cwt.at, true);
   collectItem(cwt.at, true);
   useupOrb(itOrbSpace, cost.first);
@@ -901,6 +918,7 @@ EX eMonster summonedAt(cell *dest) {
     if(dest->land == laBrownian) return moAcidBird;
     if(dest->land == laVariant) return moFireElemental;
     if(dest->land == laWestWall) return moAirElemental;
+    if(dest->land == laTines) return moBirdBlight;
     if(isHaunted(dest->land)) return moGhost;
     }
   return moNone;
@@ -1136,6 +1154,7 @@ void blowoff(const movei& mi) {
 
 void useOrbOfDragon(cell *c) {
   makeflame(c, 20, false);
+  if(c->monst == moTineGuard) c->monst = moTine;
   playSound(c, "fire");
   addMessage(XLAT("You throw fire!"));
   useupOrb(itOrbDragon, 5);
@@ -1208,6 +1227,44 @@ EX cell *common_neighbor(cell *cf, cell *ct) {
     if(isNeighbor(cc, ct)) return cc;
     }
   return nullptr;
+  }
+
+const eMonster growth_ivy_priority[5] =
+  {moMutant, moIvyHead, moIvyRoot, moIvyBranch, moIvyWait};
+
+const eWall growth_wall_priority[10] =
+  {waVinePlant, waCTree, waBigTree, waSmallTree, waShrub, waRose, waBigBush, waSmallBush, waSolidBranch, waWeakBranch};
+
+EX int growth_which(cell *c) {
+  for(eMonster m: growth_ivy_priority) forCellIdEx(c2, i, c) if(c2->monst == m) return i;
+  for(eWall w: growth_wall_priority) forCellIdEx(c2, i, c) if(c2->wall == w) return i;
+  return NODIR;
+  }
+
+void growth_grow(cell *c, int fromdir) {
+  movei mi(c, fromdir);
+  cell *cf = mi.t;
+  if(among(cf->monst, moMutant, moIvyHead, moIvyRoot, moIvyBranch, moIvyWait)) {
+    animateMovement(mi.rev(), LAYER_BIG);
+    c->mondir = fromdir;
+    if(cf->monst == moMutant) {
+      c->monst = moMutant;
+      c->stuntime = (cf->stuntime + 1) & 15;
+      }
+    else if(cf->monst == moIvyHead) {
+      c->monst = moIvyHead;
+      cf->monst = moIvyBranch;
+      }
+    else {
+      c->monst = moIvyWait;
+      }
+    }
+  else {
+    c->wall = cf->wall;
+    }
+  useupOrb(itOrbGrowth, 10);
+  bfs();
+  checkmoveO();
   }
 
 EX void apply_impact(cell *c) {
@@ -1482,6 +1539,15 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     if(!isCheck(a)) useOrbOfDragon(c), apply_impact(c);
     return itOrbDragon;
     }
+
+  // growth
+  if(items[itOrbGrowth] && !c->monst && !c->item && among(c->wall, waNone, waCIsland, waCIsland2, waCanopy)) {
+    int fromdir = growth_which(c);
+    if(fromdir != NODIR) {
+      if (!isCheck(a)) growth_grow(c, fromdir), apply_impact(c);
+      return itOrbGrowth;
+      }
+    }
   
   if(isWeakCheck(a)) return itNone;
   
@@ -1617,6 +1683,7 @@ EX int orbcharges(eItem it) {
     case itOrbDigging:
     case itOrbTeleport:
     case itOrbMagnetism:
+    case itOrbGrowth:
       return 77;
     case itOrbDomination:
       return 90;

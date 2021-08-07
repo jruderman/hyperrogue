@@ -80,7 +80,7 @@ void randomCheat() {
   } else if (croll == 37) {
     cell *ct = dcal[hrand(isize(dcal))];
     if (!isPlayerOn(ct) && !ct->monst && !ct->wall) {
-      ct->monst = pick(moRagingBull, moTroll, moAcidBird, moMiner, moReptile, moVineBeast, moBug0, moBug1);
+      ct->monst = pick(moRagingBull, moTroll, moAcidBird, moMiner, moBirdBlight, moReptile, moVineBeast, moBug0, moBug1);
       printf("Spam a monster: %s\n", minf[ct->monst].name);
     }
     // todo: dice

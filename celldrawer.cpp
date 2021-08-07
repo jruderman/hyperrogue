@@ -312,6 +312,12 @@ void celldrawer::setcolors() {
       fcol = floorcolors[c->land];
       if(pseudohept(c)) fcol = fcol * 3/4;
       break;
+
+    case laTines:
+      fcol = floorcolors[c->land];
+      if(pseudohept(c)) fcol = fcol * 3/4;
+      if(c->wall == waCTree) wcol = 0x008090;
+      break;
   
     case laIvoryTower:
       fcol = 0x10101 * flip_dark(c->landparam, 32, 64) - 0x000010;

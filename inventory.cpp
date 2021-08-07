@@ -374,6 +374,7 @@ EX namespace inv {
     
     gainOrbs(itCursed, itOrbPurity);
     gainOrbs(itDice, itOrbLuck);
+    gainOrbs(itTines, itOrbGrowth);
 
 #if CAP_DAILY    
     daily::gifts();

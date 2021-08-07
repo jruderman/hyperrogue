@@ -1587,7 +1587,8 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       return true;
       }
     
-    case moRunDog: case moHunterDog: case moHunterGuard: case moHunterChanging: case moFallingDog: {
+    case moRunDog: case moHunterDog: case moHunterGuard: case moHunterChanging: case moFallingDog:
+    case moTineGuard: case moTine: {
       if(!mmspatial && !footphase) 
         queuepoly(VABODY, cgi.shDogBody, darkena(col, 0, 0xFF));
       else {
@@ -1601,8 +1602,8 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       dynamicval<color_t> dp(poly_outline);
       int eyecolor = 0x202020;
       bool redeyes = false;
-      if(m == moHunterDog) eyecolor = 0xFF0000, redeyes = true;
-      if(m == moHunterGuard) eyecolor = 0xFF6000, redeyes = true;
+      if(m == moHunterDog || m == moTine) eyecolor = 0xFF0000, redeyes = true;
+      if(m == moHunterGuard || m == moTineGuard) eyecolor = 0xFF6000, redeyes = true;
       if(m == moHunterChanging) eyecolor = 0xFFFF00, redeyes = true;
       int eyes = darkena(eyecolor, 0, 0xFF);
   
@@ -1642,7 +1643,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
 
     case moEagle: case moParrot: case moBomberbird: case moAlbatross:
     case moTameBomberbird: case moWindCrow: case moTameBomberbirdMoved:
-    case moSandBird: case moAcidBird: {
+    case moSandBird: case moAcidBird: case moBirdBlight: {
       ShadowV(V, cgi.shEagle);
       auto& sh = GDIM == 3 ? cgi.shAnimatedEagle[wingphase(200)] : cgi.shEagle;
       if(m == moParrot && GDIM == 3)
@@ -4105,6 +4106,7 @@ EX int ceiling_category(cell *c) {
     case laRedRock:
     case laZebra:
     case laHunting:
+    case laTines:
     case laEAir:
     case laStorms:
     case laMountain:
@@ -4595,6 +4597,8 @@ EX void drawMarkers() {
       }
     else if(orbToTarget) {
       queuestr(mousex, mousey, 0, vid.fsize, "@", iinf[orbToTarget].color);
+      if (orbToTarget == itOrbGrowth)
+        queuecircleat(mouseover->move(growth_which(mouseover)), 0.6, darkena(0x00FFFF, 0, 0xFF));
       queuecircleat(mouseover, 0.6, darkena(iinf[orbToTarget].color, 0, 0xFF));
       }
     #endif
