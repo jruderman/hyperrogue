@@ -1603,7 +1603,8 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       int eyecolor = 0x202020;
       bool redeyes = false;
       if(m == moHunterDog || m == moTine) eyecolor = 0xFF0000, redeyes = true;
-      if(m == moHunterGuard || m == moTineGuard) eyecolor = 0xFF6000, redeyes = true;
+      if(m == moHunterGuard) eyecolor = 0xFF6000, redeyes = true;
+      if(m == moTineGuard) eyecolor = 0x202020, redeyes = true;
       if(m == moHunterChanging) eyecolor = 0xFFFF00, redeyes = true;
       int eyes = darkena(eyecolor, 0, 0xFF);
   
