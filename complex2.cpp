@@ -1468,7 +1468,7 @@ EX namespace tines {
       forCellEx(c3, c2) {
         if (c3->monst == moTineGuard)
           guarded = true;  // dog on c3 can move to c2, thereby guarding c2 directly
-        else if (isNeighbor(c3, c))
+        else if (!c3->wall && isNeighbor(c3, c))
           forCellEx(c4, c3)
             if (c4->monst == moTineGuard)
               guarded = true;  // dog on c4 can move to c3, thereby guarding c2 indirectly
