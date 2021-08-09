@@ -631,7 +631,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       if(c2->wall == waExplosiveBarrel) explodeBarrel(c2);
       }
     }
-  if(m == moBirdBlight) {
+  if(m == moBirdBlight && !checkOrb(who, itOrbStone)) {
     pcount = 0;
     playSound(c, "splash" + pick12());
     blightEffect(c);
