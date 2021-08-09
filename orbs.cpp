@@ -1236,8 +1236,14 @@ const eWall growth_wall_priority[10] =
   {waVinePlant, waCTree, waBigTree, waSmallTree, waShrub, waRose, waBigBush, waSmallBush, waSolidBranch, waWeakBranch};
 
 EX int growth_which(cell *c) {
-  for(eMonster m: growth_ivy_priority) forCellIdEx(c2, i, c) if(c2->monst == m) return i;
-  for(eWall w: growth_wall_priority) forCellIdEx(c2, i, c) if(c2->wall == w) return i;
+  for(eMonster m: growth_ivy_priority)
+    forCellIdEx(c2, i, c)
+      if(c2->monst == m && !strictlyAgainstGravity(c, c2, false, MF_IVY))
+        return i;
+  for(eWall w: growth_wall_priority)
+    forCellIdEx(c2, i, c)
+      if(c2->wall == w)
+        return i;
   return NODIR;
   }
 
@@ -1635,7 +1641,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     CHK(!c->item, XLAT("Cannot cause growth on an item!")) &&
     CHK(among(c->wall, waNone, waCIsland, waCIsland2, waCanopy), XLAT("Cannot cause growth on the %1!", c->wall))) {
     int fromdir = growth_which(c);
-    if(CHK(fromdir != NODIR, XLAT("No growable plants on adjacent cells!"))) {
+    if(CHK(fromdir != NODIR, XLAT("No plants can grow here from adjacent cells!"))) {
       if (!isCheck(a)) growth_grow(c, fromdir), apply_impact(c);
       return itOrbGrowth;
       }
