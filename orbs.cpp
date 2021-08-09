@@ -1630,9 +1630,12 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     }
 
   // growth
-  if(items[itOrbGrowth] && !c->monst && !c->item && among(c->wall, waNone, waCIsland, waCIsland2, waCanopy)) {
+  if(items[itOrbGrowth] &&
+    CHK(!c->monst, XLAT("Cannot cause growth on a monster!")) &&
+    CHK(!c->item, XLAT("Cannot cause growth on an item!")) &&
+    CHK(among(c->wall, waNone, waCIsland, waCIsland2, waCanopy), XLAT("Cannot cause growth on the %1!", c->wall))) {
     int fromdir = growth_which(c);
-    if(fromdir != NODIR) {
+    if(CHK(fromdir != NODIR, XLAT("No growable plants on adjacent cells!"))) {
       if (!isCheck(a)) growth_grow(c, fromdir), apply_impact(c);
       return itOrbGrowth;
       }
