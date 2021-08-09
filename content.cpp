@@ -1752,7 +1752,7 @@ MONSTER( 'W', 0xDDDDDD, "Tine", moTine, CF_FACE_SIDE, RESERVED, moYeti,
     )
 
 MONSTER( 'B', 0xDD00DD, "Blight Bird", moBirdBlight, CF_FACE_SIDE | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE | CF_NONLIVING, RESERVED, moEagle,
-    "When a Blight Bird dies, adjacent plants and treasures are destroyed, and adjacent Orbs are corrupted. The effect can spread up to three cells from the source."
+    "When a Blight Bird dies, adjacent plants and treasures are destroyed, and adjacent Orbs are corrupted."
     )
 
 //shmupspecials

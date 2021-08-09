@@ -410,22 +410,21 @@ EX void minerEffect(cell *c) {
   if(c->wall != ow && ow) drawParticles(c, winf[ow].color, 16);
   } 
 
-EX void blightEffect(cell *c, int spread_distance) {
+EX void blightEffect(cell *c) {
   changes.ccell(c);
-  bool spread = false;
 
+  if(isAnyIvy(c->monst) || c->monst == moVineBeast) {
+    killMonster(c, moBirdBlight);
+    }
   if (destroyHalfvine(c)) {
-    spread = true;
     }
   else if(among(c->wall, waVinePlant, waCTree, waBigTree, waSmallTree, waShrub, waRose, waBigBush, waSmallBush, waSolidBranch, waWeakBranch)) {
     drawParticles(c, winf[c->wall].color, 16);
     c->wall = waNone;
-    spread = true;
     }
   if(itemclass(c->item) == IC_TREASURE) {
     drawParticles(c, iinf[c->item].color, 16);
     c->item = itNone;
-    spread = true;
     }
   else if(itemclass(c->item) == IC_ORB && !(classflag(c->item) & IF_CURSE) && c->item != itGreenStone) {
     drawParticles(c, iinf[c->item].color, 16);
@@ -438,11 +437,6 @@ EX void blightEffect(cell *c, int spread_distance) {
       addMessage(XLAT("%The1 is drained of its power!", c->item));
       c->item = itGreenStone;
       }
-    spread = true;
-    }
-
-  if(spread_distance && spread) {
-    forCellEx(c2, c) blightEffect(c2, spread_distance - 1);
     }
   }
 
@@ -640,9 +634,9 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   if(m == moBirdBlight) {
     pcount = 0;
     playSound(c, "splash" + pick12());
-    blightEffect(c, 0);
+    blightEffect(c);
     forCellEx(c1, c)
-      blightEffect(c1, 2);
+      blightEffect(c1);
     }
   if(m == moOrangeDog) {
     if(pcount) for(int i=0; i<8; i++) {
