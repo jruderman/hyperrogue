@@ -57,9 +57,9 @@ vector<pair<cell*, eMonster>> tempmonsters;
 /** additional direction information for BFS algorithms.
  *  It remembers from where we have got to this location
  *  the opposite cell will be added to the queue first,
- *  which helps the AI.
+ *  which helps the AI. Used by computePathdist and its callees.
  **/
-EX vector<int> reachedfrom;
+EX vector<int> path_reachedfrom;
 
 /** The position of the first cell in dcal in distance 7. New wandering monsters can be generated in dcal[first7..]. */
 EX int first7;           
@@ -89,21 +89,20 @@ EX cell *pd_from;
 EX int pd_range;
 
 EX void onpath(cell *c, int d) {
+  if(!pathlock) { println(hlog, "onpath without pathlock"); }
   c->pathdist = d;
   pathq.push_back(c);
   }
 
-EX void onpath(cell *c, int d, int sp) {
-  c->pathdist = d;
-  pathq.push_back(c);
-  reachedfrom.push_back(sp);
+void onpath_rf(cell *c, int d, int sp) {
+  onpath(c, d);
+  path_reachedfrom.push_back(sp);
   }
 
 EX void clear_pathdata() {
   for(auto c: pathq) c->pathdist = PINFD;
   pathq.clear(); 
   pathqm.clear();
-  reachedfrom.clear(); 
   }
 
 EX int pathlock = 0;
@@ -119,6 +118,7 @@ EX void compute_graphical_distance() {
   pd_range = sr;
   c1->pathdist = 0;
   pathq.push_back(pd_from);
+  pathlock++;
 
   for(int qb=0; qb<isize(pathq); qb++) {
     cell *c = pathq[qb];
@@ -128,6 +128,8 @@ EX void compute_graphical_distance() {
       if(c1->pathdist == PINFD)
         onpath(c1, c->pathdist + 1);
     }
+
+  pathlock--;
   }
 
 const int max_radius = 16;
@@ -166,15 +168,17 @@ void princess_ai::run() {
         info[0].visit(c1);
       }
     if(k == radius && c->wall == waOpenPlate && c->pathdist == PINFD)
-      onpath(c, d, hrand(c->type));
+      onpath_rf(c, d, hrand(c->type));
     }
   }
 
 EX void computePathdist(eMonster param, bool include_allies IS(true)) {
   
+  path_reachedfrom.clear();
+
   for(cell *c: targets)
     if(include_allies || isPlayerOn(c))
-      onpath(c, isPlayerOn(c) ? 0 : 1, hrand(c->type));
+      onpath_rf(c, isPlayerOn(c) ? 0 : 1, hrand(c->type));
 
   int qtarg = isize(targets);
   
@@ -188,7 +192,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
   
   for(; qb < isize(pathq); qb++) {
     cell *c = pathq[qb];
-    int fd = reachedfrom[qb] + c->type/2;
+    int fd = path_reachedfrom[qb] + c->type/2;
     if(c->monst && !isBug(c) && !(isFriendly(c) && !c->stuntime)) {
       pathqm.push_back(c); 
       continue; // no paths going through monsters
@@ -220,7 +224,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
             continue;
           }
 
-        onpath(c2, d+1, c->c.spin(i));
+        onpath_rf(c2, d+1, c->c.spin(i));
         }
       
       else if(c2 && c2->wall == waClosedGate && princess)
@@ -236,25 +240,42 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
 
 #if HDR
 struct pathdata {
-  void checklock() { 
-    if(pd_from) pd_from = NULL, clear_pathdata();
-    if(pathlock) printf("path error\n"); 
-    pathlock++; 
-    }
-  ~pathdata() {
-    pathlock--;
-    clear_pathdata();
-    }
-  pathdata(eMonster m, bool include_allies IS(true)) { 
-    checklock();
-    computePathdist(m, include_allies); 
-    }
-  pathdata(int i) { 
-    checklock();
-    }
+  void checklock();
+  ~pathdata();
+  pathdata(eMonster m, bool include_allies IS(true));
+  pathdata(int i);
   };
 #endif
+
+pathdata::~pathdata() {
+  pathlock--;
+  clear_pathdata();
+  }
+
+void pathdata::checklock() {
+  if(pd_from) pd_from = NULL, clear_pathdata();
+  if(pathlock) printf("path error\n");
+  pathlock++;
+  }
+
+pathdata::pathdata(int i) { checklock(); }
+
+pathdata::pathdata(eMonster m, bool include_allies IS(true)) {
+  checklock();
+  if(isize(pathq))
+    println(hlog, "! we got tiles on pathq: ", isize(pathq));
+
+  computePathdist(m, include_allies);
+  }
+
 // pathdist end
+
+/** additional direction information for BFS algorithms.
+ *  It remembers from where we have got to this location
+ *  the opposite cell will be added to the queue first,
+ *  which helps the AI. Used in bfs().
+ **/
+EX vector<int> bfs_reachedfrom;
 
 /** calculate cpdist, 'have' flags, and do general fixings */
 EX void bfs() {
@@ -283,7 +304,7 @@ EX void bfs() {
   airmap.clear();
   if(!(hadwhat & HF_ROSE)) rosemap.clear();
   
-  dcal.clear(); reachedfrom.clear(); 
+  dcal.clear(); bfs_reachedfrom.clear();
 
   recalcTide = false;
   
@@ -292,7 +313,7 @@ EX void bfs() {
     c->cpdist = 0;
     checkTide(c);
     dcal.push_back(c);
-    reachedfrom.push_back(hrand(c->type));
+    bfs_reachedfrom.push_back(hrand(c->type));
     if(!invismove) targets.push_back(c);
     }
   
@@ -308,7 +329,7 @@ EX void bfs() {
   first7 = 0;
   while(true) {
     if(qb == isize(dcal)) break;
-    int i, fd = reachedfrom[qb] + 3;
+    int i, fd = bfs_reachedfrom[qb] + dcal[qb]->type/2;
     cell *c = dcal[qb++];
     
     int d = c->cpdist;
@@ -389,7 +410,7 @@ EX void bfs() {
         
         if(!keepLightning) c2->ligon = 0;
         dcal.push_back(c2);
-        reachedfrom.push_back(c->c.spin(i));
+        bfs_reachedfrom.push_back(c->c.spin(i));
         
         checkTide(c2);
                 
@@ -799,7 +820,7 @@ EX void monstersTurn() {
   if(!phase2) movemonsters();
 
   for(cell *pc: player_positions()) if(pc->item == itOrbSafety)  {
-    collectItem(pc, true);
+    collectItem(pc, pc, true);
     return;
     }
 
@@ -863,6 +884,27 @@ EX void monstersTurn() {
   for(cell *pc: player_positions())
     history::movehistory.push_back(pc);
 #endif
+  }
+
+/** check if whirlline is looped, if yes, remove the repeat; may not detect loops immediately */
+EX bool looped(vector<cell*>& whirlline) {
+  if(isize(whirlline) == 1)
+    return false;
+  if(whirlline.back() == whirlline.front()) {
+    whirlline.pop_back();
+    return true;
+    }
+  int pos = isize(whirlline)/2;
+  if(isize(whirlline) > 2 && whirlline.back() == whirlline[pos]) {
+    while(pos && whirlline.back() == whirlline[pos])
+      whirlline.pop_back();
+    /* something weird must have happened... */
+    static bool once = true;
+    if(once) addMessage("warning: a looped line");
+    once = false;
+    return true;
+    }
+  return false;
   }
 
 }

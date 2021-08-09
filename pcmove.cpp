@@ -246,6 +246,7 @@ bool pcmove::movepcto() {
   if(d >= 0 && !checkonly && subdir != 1 && subdir != -1) printf("subdir = %d\n", subdir);
   mip.t = NULL;
   switchplaces = false;
+  warning_shown = false;
 
   if(d == MD_USE_ORB) 
     return targetRangedOrb(multi::whereto[multi::cpid].tgt, roMultiGo);
@@ -293,7 +294,7 @@ bool pcmove::movepcto() {
 
     if(items[itOrbFlash]) {
       if(checkonly) { nextmovetype = lmInstant; return true; }
-      if(orbProtection(itOrbFlash)) return true;
+      if(warning_shown || orbProtection(itOrbFlash)) return true;
       activateFlash();
       checkmove();
       return true;
@@ -301,7 +302,7 @@ bool pcmove::movepcto() {
 
     if(items[itOrbLightning]) {
       if(checkonly) { nextmovetype = lmInstant; return true; }
-      if(orbProtection(itOrbLightning)) return true;
+      if(warning_shown || orbProtection(itOrbLightning)) return true;
       activateLightning();
       checkmove();
       return true;
@@ -903,7 +904,7 @@ bool pcmove::after_escape() {
     tell_why_impassable();
     return false;
     }
-  else if(items[itFatigue] + fatigue_cost(mi) > 10) {
+  else if(markOrb(itCurseFatigue) && items[itFatigue] + fatigue_cost(mi) > 10) {
     if(vmsg(miRESTRICTED)) 
       addMessage(XLAT("You are too fatigued!"));
     return false;
@@ -1147,11 +1148,11 @@ bool pcmove::perform_actual_move() {
 
   movecost(cwt.at, c2, 1);
 
-  if(!boatmove && collectItem(c2)) return true;
+  if(!boatmove && collectItem(c2, cwt.at)) return true;
   if(boatmove && c2->item && cwt.at->item) {
      eItem it = c2->item;
      c2->item = cwt.at->item;
-     if(collectItem(c2)) return true;
+     if(collectItem(c2, cwt.at)) return true;
      eItem it2 = c2->item;
      c2->item = it;
      cwt.at->item = it2;
@@ -1167,7 +1168,7 @@ bool pcmove::perform_actual_move() {
     forCellEx(c3, c2) if(c3->wall == waIcewall && c3->item) {
       changes.ccell(c3);
       markOrb(itOrbWinter);
-      if(collectItem(c3)) return true;
+      if(collectItem(c3, cwt.at)) return true;
       }
   
   movecost(cwt.at, c2, 2);
@@ -1277,11 +1278,13 @@ bool pcmove::stay() {
 inline bool movepcto(const movedir& md) { return movepcto(md.d, md.subdir); }
 #endif
 
+EX bool warning_shown;
 
 EX bool warningprotection(const string& s) {
   if(hardcore) return false;
   if(multi::activePlayers() > 1) return false;
   if(items[itWarning]) return false;
+  warning_shown = true;
   pushScreen([s] () {
     gamescreen(1);
     dialog::addBreak(250);

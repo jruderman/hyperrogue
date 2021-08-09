@@ -225,6 +225,7 @@ EX namespace westwall {
     again: 
     cell *at = whirlline[isize(whirlline)-1];
     cell *prev = whirlline[isize(whirlline)-2];
+    if(looped(whirlline)) return;
     for(int i=0; i<at->type; i++) 
       if(at->move(i) && coastvalEdge1(at->move(i)) == d && at->move(i) != prev) {
         whirlline.push_back(at->move(i));
@@ -254,7 +255,7 @@ EX namespace westwall {
         animateMovement(match(whirlline[i+1], whirlline[i]), LAYER_BOAT);
       }
     for(int i=0; i<z; i++) 
-      pickupMovedItems(whirlline[i]);
+      pickupMovedItems(whirlline[i], i<z-1 ? whirlline[i+1] : whirlline[0]);
     }
   
   EX void move() {

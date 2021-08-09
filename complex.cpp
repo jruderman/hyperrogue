@@ -102,6 +102,7 @@ EX namespace whirlwind {
     again: 
     cell *at = whirlline[isize(whirlline)-1];
     cell *prev = whirlline[isize(whirlline)-2];
+    if(looped(whirlline)) return;
     for(int i=0; i<at->type; i++) 
       if(at->move(i) && (euclid || at->move(i)->master->alt) && celldistAlt(at->move(i)) == d && at->move(i) != prev) {
         whirlline.push_back(at->move(i));
@@ -144,7 +145,7 @@ EX namespace whirlwind {
         animateMovement(match(whirlline[i+1], whirlline[i]), LAYER_BOAT);
       }
     for(int i=0; i<z; i++) 
-      pickupMovedItems(whirlline[i]);
+      pickupMovedItems(whirlline[i], i==z-1 ? whirlline[0] : whirlline[i+1]);
     }
   
   EX void move() {
@@ -1062,10 +1063,9 @@ EX namespace whirlpool {
     again: 
     cell *at = whirlline[isize(whirlline)-1];
     cell *prev = whirlline[isize(whirlline)-2];
+    if(looped(whirlline)) return;
     for(int i=0; i<at->type; i++) 
       if(at->move(i) && (eubinary || at->move(i)->master->alt) && celldistAlt(at->move(i)) == d && at->move(i) != prev) {
-        if(at->move(i) == whirlline[0]) return; // loops in weird geometries?
-        if(at->move(i) == whirlline[isize(whirlline)/2]) return; // even weirder geometry?
         whirlline.push_back(at->move(i));
         goto again;
         }
@@ -1119,8 +1119,8 @@ EX namespace whirlpool {
       if(wfrom->item == itKey || wfrom->item == itOrbYendor)
         for(int i=0; i<wto->type; i++) createMov(wto, i);
       moveItem(wfrom, wto, false);
-      pickupMovedItems(wfrom);
-      pickupMovedItems(wto);
+      pickupMovedItems(wfrom, wto);
+      pickupMovedItems(wto, wfrom);
       }
     
     if(wto && !wfrom) 
@@ -2466,7 +2466,7 @@ EX void livecaves() {
       if(hv > 0 && c->wall == waNone) {
         if(c->item && c->cpdist == 1 && markOrb(itOrbWater)) {
           bool saf = c->item == itOrbSafety;
-          collectItem(c);
+          collectItem(c, c);
           if(saf) return;
           }
         c->wall = waSea;

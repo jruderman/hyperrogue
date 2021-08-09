@@ -43,6 +43,7 @@ struct celldrawer {
   void bookkeeping();
   void draw_cellstat();
   void draw_wall_full();
+  void draw_wallshadow();
   void draw_item_full();
   void draw_monster_full();
   void add_map_effects();
@@ -667,6 +668,13 @@ int celldrawer::getSnakelevColor(int i, int last) {
   return darkena(col, fd, 0xFF);
   }
 
+void celldrawer::draw_wallshadow() {
+  if(!noshadow) {
+    dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+    draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
+    }
+  }
+
 void celldrawer::draw_wall() {
 
   if(no_wall_rendering) return;
@@ -675,8 +683,7 @@ void celldrawer::draw_wall() {
     if(!qfi.fshape) qfi.fshape = &cgi.shFullFloor;
     if(conegraph(c)) {
       draw_shapevec(c, V, qfi.fshape->cone[0], darkena(wcol, 0, 0xFF), PPR::WALL);
-      dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
-      draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
+      draw_wallshadow();
       return;
       }
     if(c->wall == waClosedGate) {
@@ -693,8 +700,7 @@ void celldrawer::draw_wall() {
       if(!highwall(c2) || conegraph(c2) || c2->wall == waClosedGate || fake::split())
         placeSidewall(c, i, SIDE_WALL, V, darkena(wcol2, fd, 255));
 
-    dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
-    draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
+    draw_wallshadow();
     return;
     }
 
@@ -954,7 +960,10 @@ void celldrawer::draw_halfvine() {
     shiftmatrix Vdepth = mscale(V2, cgi.WALL);
 
     queuepolyat(GDIM == 2 ? Vdepth : V2, cgi.shSemiFloor[0], darkena(vcol, fd, 0xFF), PPR::WALL3A);
-    {dynamicval<color_t> p(poly_outline, OUTLINE_TRANS); queuepolyat(V2 * spin(M_PI*2/3), cgi.shSemiFloorShadow, SHADOW_WALL, GDIM == 2 ? PPR::WALLSHADOW : PPR::TRANSPARENT_SHADOW); }
+    if(!noshadow) {
+      dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+      queuepolyat(V2 * spin(M_PI*2/3), cgi.shSemiFloorShadow, SHADOW_WALL, GDIM == 2 ? PPR::WALLSHADOW : PPR::TRANSPARENT_SHADOW);
+      }
     #if MAXMDIM >= 4
     if(GDIM == 3 && qfi.fshape) {
       auto& side = queuepolyat(V2, cgi.shSemiFloorSide[SIDE_WALL], darkena(vcol, fd, 0xFF), PPR::WALL3A-2+away(V2.T));
@@ -1531,8 +1540,7 @@ void celldrawer::draw_features() {
       if(c->land == laOceanWall && wmescher && wmspatial) {
        if(GDIM == 3 && qfi.fshape) {
          draw_shapevec(c, V, qfi.fshape->cone[1], darkena(wcol, 0, 0xFF), PPR::WALL);
-         dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
-         draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
+         draw_wallshadow();
          break;
          }           
        const int layers = 2 << detaillevel;
@@ -1623,8 +1631,7 @@ void celldrawer::draw_features() {
       else if(c->wall == waExplosiveBarrel) {
         if(GDIM == 3 && qfi.fshape) {
           draw_shapevec(c, V, qfi.fshape->cone[1], 0xD00000FF, PPR::REDWALL);
-          dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
-          draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
+          draw_wallshadow();
           break;
           }
         const int layers = 2 << detaillevel;
@@ -1649,8 +1656,7 @@ void celldrawer::draw_features() {
         if(hasTimeout(c)) V2 = V2 * spintick(c->land == laPower ? 5000 : 500);
         if(GDIM == 3 && qfi.fshape) {
           draw_shapevec(c, V2, qfi.fshape->cone[1], darkena(wcol, 0, 0xF0), PPR::WALL);
-          dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
-          draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
+          draw_wallshadow();
           }
         else queuepoly(V2, cgi.shStar, darkena(wcol, 0, 0xF0));
         if(isFire(c) && rand() % 300 < ticks - lastt)
