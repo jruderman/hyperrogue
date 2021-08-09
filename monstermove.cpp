@@ -1419,6 +1419,7 @@ EX void movemutant() {
 
       if(c2->monst != moMutant && canAttack(c, moMutant, c2, c2->monst, AF_ONLY_FBUG | AF_GETPLAYER)) {
         attackMonster(c2, AF_NORMAL | AF_MSG | AF_GETPLAYER, moMutant);
+        if(c->monst != moMutant) break;
         continue;
         }
       
